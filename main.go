@@ -2,37 +2,19 @@ package main
 
 import (
 	"flag"
-	"fmt"
-	"io"
-	"log"
-	"net"
+	"go-echo-server/client"
+	"go-echo-server/server"
 )
 
 func main() {
-	port := flag.Int("port", 9000, "port to listen on")
+	port := flag.Int("p", 9000, "port to listen on")
+	mode := flag.String("m", "server", "mode to run in")
 	flag.Parse()
-	runServer(*port)
-}
 
-func runServer(port int) {
-	listener, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
-	if err != nil {
-		log.Fatal(err)
+	switch *mode {
+	case "server":
+		server.RunServer(*port)
+	case "client":
+		client.RunClient(*port)
 	}
-	defer listener.Close()
-
-	for {
-		conn, err := listener.Accept()
-		log.Println("Accepted connection:", conn.RemoteAddr())
-		if err != nil {
-			log.Fatal(err)
-		}
-		go handleConnection(conn)
-	}
-}
-
-func handleConnection(conn net.Conn) {
-	io.Copy(conn, conn)
-	conn.Close()
-	log.Println("Closed connection:", conn.RemoteAddr())
 }
